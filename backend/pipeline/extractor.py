@@ -1,9 +1,4 @@
-# Stage 4 - Extractor  (uses Groq / Llama 3.3 70B - free tier)
-
-# Same logic as before, just using the Groq client instead of Anthropic.
-# We use llama-3.3-70b-versatile for extraction - it handles structured
-# JSON output reliably.
-
+# Stage 4 - Extractor  (uses Cerebras / Llama 3.3 70B)
 
 from __future__ import annotations
 import asyncio
@@ -12,12 +7,12 @@ import re
 import uuid
 import logging
 
-from groq import AsyncGroq
+from cerebras.cloud.sdk import AsyncCerebras
 from ..models import Entity, CellValue, ScrapedPage, SourceRef
 
 logger = logging.getLogger(__name__)
 
-_MAX_CONCURRENT_EXTRACTIONS = 3   # Groq free tier has rate limits - be conservative
+_MAX_CONCURRENT_EXTRACTIONS = 8  # Cerebras handles high concurrency well
 
 _SYSTEM = """You are a precise information extraction engine.
 
@@ -54,7 +49,7 @@ CONTENT:
 
 
 async def _extract_from_page(
-    client: AsyncGroq,
+    client: AsyncCerebras,
     page: ScrapedPage,
     columns: list[str],
     entity_type: str,
@@ -66,7 +61,7 @@ async def _extract_from_page(
     async with semaphore:
         try:
             response = await client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="qwen-3-235b-a22b-instruct-2507",
                 messages=[
                     {"role": "system", "content": _SYSTEM},
                     {"role": "user", "content": _USER_TEMPLATE.format(
@@ -74,14 +69,14 @@ async def _extract_from_page(
                         columns=", ".join(columns),
                         url=page.url,
                         title=page.title,
-                        content=page.content[:5000],   # slightly tighter for Groq token limits
+                        content=page.content[:6000],
                     )},
                 ],
                 max_tokens=3000,
                 temperature=0.1,
             )
         except Exception as exc:
-            logger.error("Groq extraction failed for %s: %s", page.url, exc)
+            logger.error("Cerebras extraction failed for %s: %s", page.url, exc)
             return []
 
     text = response.choices[0].message.content.strip()
@@ -118,14 +113,17 @@ async def _extract_from_page(
             )
         if "name" not in cells:
             continue
+        name_val = str(cells["name"].value)
+        if len(name_val) > 60 or len(name_val.split()) > 6:
+            continue
         entities.append(Entity(id=str(uuid.uuid4()), cells=cells))
 
-    logger.info("Groq extracted %d entities from %s", len(entities), page.url)
+    logger.info("Cerebras extracted %d entities from %s", len(entities), page.url)
     return entities
 
 
 async def extract_from_pages(
-    client: AsyncGroq,
+    client: AsyncCerebras,
     pages: list[ScrapedPage],
     columns: list[str],
     entity_type: str,
