@@ -1,4 +1,4 @@
-# Stage 2 — Searcher  (uses Tavily — free tier, 1000 searches/month)
+# Stage 2 - Searcher  (uses Tavily - free tier, 1000 searches/month)
 
 from __future__ import annotations
 import logging
@@ -10,7 +10,7 @@ from ..models import SearchResult
 logger = logging.getLogger(__name__)
 
 
-async def search(query: str, max_results: int = 8) -> list[SearchResult]:
+async def fetch_web_results(query: str, max_results: int = 8) -> list[SearchResult]:
     api_key = os.getenv("TAVILY_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("TAVILY_API_KEY not set")
@@ -19,7 +19,7 @@ async def search(query: str, max_results: int = 8) -> list[SearchResult]:
     response = await client.search(
         query=query,
         max_results=max_results,
-        search_depth="basic",   # "advanced" uses 2x quota — not needed
+        search_depth="basic",   # "advanced" uses 2x quota - not needed
         include_answer=False,
     )
 
