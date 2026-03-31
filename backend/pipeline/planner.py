@@ -8,7 +8,7 @@ from ..models import SearchPlan
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are an expert at planning structured web research.
+SYSTEM_PLANNER_PROMPT = """You are an expert at planning structured web research.
 
 Given a topic query you must:
 1. Identify the entity type (e.g. "AI healthcare startups", "pizza restaurants")
@@ -17,10 +17,11 @@ Given a topic query you must:
    - "name" must always be the FIRST column
    - Include a short "description" column second
    - Add 3 domain-specific attributes (for companies pick 3 from: founded_year, headquarters, funding_stage, website; for restaurants pick 3 from: cuisine, price_range, rating, address)
-3. Generate 4 - 6 DIVERSE search queries covering different angles
+3. Generate EXACTLY 3 DIVERSE search queries covering different angles
 
-Respond with ONLY a JSON object - no markdown, no extra text:
-{
+Respond with ONLY a JSON object - no markdown, no extra text as shown in this example:
+
+Example: {
   "entity_type": "short description",
   "columns": ["name", "description", ...],
   "search_queries": ["query1", "query2", ...],
@@ -32,7 +33,7 @@ async def plan_search(client: AsyncCerebras, query: str) -> SearchPlan:
     response = await client.chat.completions.create(
         model="qwen-3-235b-a22b-instruct-2507",
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PLANNER_PROMPT},
             {"role": "user", "content": f"Plan a structured search for: {query}"},
         ],
         max_tokens=1024,
