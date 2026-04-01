@@ -29,31 +29,11 @@
   <nav>
     <div class="nav-logo">Agent<span>Search.</span></div>
     <div class="nav-right">
-      <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3)">CIIR Challenge</span>
-      <button class="nav-link-btn" onclick="toggleSettings()">
-        <svg style="width:13px;height:13px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
-        API
-      </button>
-      <button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
+<button class="tog" onclick="toggleTheme()" aria-label="Toggle theme">
         <div class="togthumb" id="tt">🌙</div>
       </button>
     </div>
   </nav>
-
-  <!-- Settings panel -->
-  <div id="settingsPanel" style="position:fixed;top:58px;left:0;right:0;z-index:99;background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 40px;display:none;">
-    <div style="max-width:480px;display:flex;align-items:center;gap:12px;">
-      <label style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);white-space:nowrap;">Backend URL</label>
-      <input id="apiUrlInput" type="text" placeholder="http://localhost:8000"
-        style="flex:1;padding:6px 10px;font-size:12px;"
-        onchange="saveApiUrl()" />
-      <button onclick="saveApiUrl(true)" class="btn-primary" style="padding:7px 16px;font-size:11px;">Save</button>
-    </div>
-  </div>
 
   <!-- ── Main ── -->
   <main>
@@ -92,40 +72,6 @@
           <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--highlight);font-weight:600;">Try →</span>
         </div>
       </div>
-    </div>
-
-    <!-- ── Preview: cell expand demo ── -->
-    <div style="margin-bottom:48px;max-width:660px;margin-left:auto;margin-right:auto;">
-      <div class="section-label">Preview · cell expand</div>
-      <div class="app-card" style="padding:0;">
-        <div class="table-scroll">
-          <table class="result-table" style="width:100%;">
-            <thead>
-              <tr>
-                <th>Name</th><th>Description</th><th>Founded</th><th>HQ</th><th>Stage</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="name-cell">Abridge</td>
-                <td>
-                  <span class="cell-expandable"
-                    onclick="expandCell(this,'description','AI-powered clinical documentation tool that listens to doctor-patient conversations and auto-generates structured medical notes, reducing physician burnout and improving accuracy of health records.')">
-                    AI-powered clinical documentation tool that listen…
-                    <span class="show-more-hint">expand</span>
-                  </span>
-                </td>
-                <td>2018</td>
-                <td>Pittsburgh, PA</td>
-                <td>Series B</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);margin-top:8px;letter-spacing:0.5px;">
-        ↑ hover description cell · click <span style="color:var(--highlight);">expand</span> · row slides open below
-      </p>
     </div>
 
     <!-- ── Progress Section ── -->
