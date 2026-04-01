@@ -455,6 +455,13 @@ select {
 .result-table td.name-cell {
   font-family: 'Roboto', sans-serif; font-weight: 700;
   color: var(--text); font-size: 14px;
+  white-space: normal; overflow: visible; text-overflow: unset; max-width: none;
+}
+
+/* LLM-filled star badge */
+.llm-star {
+  color: #f59e0b; font-size: 11px; line-height: 1;
+  vertical-align: middle; cursor: help;
 }
 .null-cell { color: var(--text3); font-style: italic; font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 400; }
 

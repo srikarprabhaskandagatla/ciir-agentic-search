@@ -211,8 +211,12 @@ function renderResults(data) {
     `${entities.length} ${entity_type}`;
   document.getElementById('resultsMeta').textContent =
     `${sources_consulted.length} sources consulted · ${search_queries_used.length} search queries · ${rounds_completed} round(s)`;
+  const hasLLMFilled = entities.some(e =>
+    Object.values(e.cells || {}).some(c => c.llm_filled)
+  );
   document.getElementById('sourcesText').textContent =
-    `Every highlighted value traces to a source. Click the blue badges (①②③) to see the exact excerpt.`;
+    `Every highlighted value traces to a source. Click the blue badges (①②③) to see the exact excerpt.` +
+    (hasLLMFilled ? '  ★ Starred values are LLM estimates and may be inaccurate.' : '');
 
   // Build column list: skip 'name' from columns since it's rendered first anyway
   const allCols = columns;
@@ -240,6 +244,7 @@ function renderResults(data) {
         const conf = cell.confidence || 1;
         const confClass = conf >= 0.85 ? 'conf-high' : conf >= 0.65 ? 'conf-mid' : 'conf-low';
         const sources = cell.sources || [];
+        const isLLMFilled = cell.llm_filled === true;
 
         // Collect all sources for the entity
         sources.forEach(src => {
@@ -256,13 +261,32 @@ function renderResults(data) {
           return `<span class="src-badge" onclick="showSource('${urlEscaped}','${titleEscaped}','${snippetEscaped}')" title="${titleEscaped}">${srcIdx + 1}</span>`;
         }).join('');
 
+        const starPrefix = isLLMFilled ? `<span class="llm-star" title="LLM estimate — may be inaccurate">★</span> ` : '';
+        const TRUNCATE = 72;
+        const isLong = col !== 'name' && val.length > TRUNCATE;
+        const displayVal = isLong ? escapeHtml(val.slice(0, TRUNCATE)) + '…' : escapeHtml(val);
+
         td.className = col === 'name' ? 'name-cell' : '';
-        td.innerHTML = `
-          <div class="flex items-start gap-1">
-            <span class="conf-dot ${confClass}" title="Confidence: ${Math.round(conf*100)}%"></span>
-            <span title="${escapeHtml(val)}">${escapeHtml(val)}</span>
-            ${badges}
-          </div>`;
+
+        if (isLong) {
+          const safeFullVal = escapeHtml(val).replace(/'/g, '&#039;');
+          const safeCol = escapeHtml(col.replace(/_/g, ' '));
+          td.innerHTML = `
+            <div class="flex items-start gap-1">
+              <span class="conf-dot ${confClass}" title="Confidence: ${Math.round(conf*100)}%"></span>
+              <span class="cell-expandable" onclick="expandCell(this,'${safeCol}','${safeFullVal}')">
+                ${starPrefix}${displayVal}<span class="show-more-hint">expand</span>
+              </span>
+              ${badges}
+            </div>`;
+        } else {
+          td.innerHTML = `
+            <div class="flex items-start gap-1">
+              <span class="conf-dot ${confClass}" title="Confidence: ${Math.round(conf*100)}%"></span>
+              ${starPrefix}<span title="${escapeHtml(val)}">${escapeHtml(val)}</span>
+              ${badges}
+            </div>`;
+        }
       }
       tr.appendChild(td);
     });

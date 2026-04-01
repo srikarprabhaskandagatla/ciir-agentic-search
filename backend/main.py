@@ -17,6 +17,7 @@ from backend.pipeline import scraper, resolver, gap_analyzer
 from backend.pipeline.planner import plan_search
 from backend.pipeline.searcher import fetch_web_results
 from backend.pipeline.extractor import extract_from_pages
+from backend.pipeline.llm_filler import llm_fill_gaps
 
 from dotenv import load_dotenv
 load_dotenv("backend/.env")
@@ -155,6 +156,12 @@ async def search_endpoint(request: SearchRequest):
                     else:
                         await send_progress("analyzing", "Coverage sufficient - stopping early", rp(0.92))
                         break
+
+            # 7. LLM gap-fill — last-resort pass for still-missing values
+            await send_progress("analyzing", "Filling remaining gaps from LLM knowledge…", 0.97)
+            all_entities = await llm_fill_gaps(
+                cerebras_client, all_entities, plan.columns, plan.entity_type
+            )
 
             await send_progress("done",
                        f"Done! {len(all_entities)} entities - "

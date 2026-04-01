@@ -24,6 +24,7 @@ class CellValue(BaseModel):
     value: Any
     sources: list[SourceRef] = Field(default_factory=list)
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    llm_filled: bool = False  # True when value came from LLM knowledge, not a web source
 
     @property
     def display_value(self) -> str:
