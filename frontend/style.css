@@ -12,7 +12,7 @@ code, .mono { font-family: 'DM Mono', monospace; }
   --border:      rgba(120, 160, 255, 0.10);
   --border2:     rgba(120, 160, 255, 0.05);
   --text:        #eef0f8;
-  --text2:       #8890aa;
+  --text2:       #ffffff;
   --text3:       #3d4460;
   --card:        rgba(13, 16, 32, 0.82);
   --nav-bg:      rgba(7, 8, 15, 0.88);
@@ -30,7 +30,7 @@ code, .mono { font-family: 'DM Mono', monospace; }
   --border:      rgba(30, 110, 50, 0.12);
   --border2:     rgba(30, 110, 50, 0.06);
   --text:        #0f1f0f;
-  --text2:       #3a5a3a;
+  --text2:       #000000;
   --text3:       #7a9a7a;
   --card:        #ffffff;
   --nav-bg:      rgba(244, 249, 244, 0.93);
@@ -235,6 +235,10 @@ main > * { width: 100%; }
   font-weight: 600;
 }
 .eyebrow::before {
+  content: ''; display: inline-block;
+  width: 28px; height: 1px; background: var(--highlight);
+}
+.eyebrow::after {
   content: ''; display: inline-block;
   width: 28px; height: 1px; background: var(--highlight);
 }
