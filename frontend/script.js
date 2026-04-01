@@ -255,10 +255,12 @@ function renderResults(data) {
         // Build source badges referencing the entity-level source list
         const badges = sources.map(src => {
           const srcIdx = allSources.findIndex(s => s.url === src.url);
-          const snippetEscaped = escapeHtml(src.snippet || '');
-          const titleEscaped = escapeHtml(src.title || src.url);
-          const urlEscaped = escapeHtml(src.url);
-          return `<span class="src-badge" onclick="showSource('${urlEscaped}','${titleEscaped}','${snippetEscaped}')" title="${titleEscaped}">${srcIdx + 1}</span>`;
+          return `<span class="src-badge"
+            data-url="${escapeHtml(src.url)}"
+            data-title="${escapeHtml(src.title || src.url)}"
+            data-snippet="${escapeHtml(src.snippet || '')}"
+            onclick="showSourceFromEl(this)"
+            title="${escapeHtml(src.title || src.url)}">${srcIdx + 1}</span>`;
         }).join('');
 
         const starPrefix = isLLMFilled ? `<span class="llm-star" title="LLM estimate — may be inaccurate">★</span> ` : '';
@@ -269,12 +271,13 @@ function renderResults(data) {
         td.className = col === 'name' ? 'name-cell' : '';
 
         if (isLong) {
-          const safeFullVal = escapeHtml(val).replace(/'/g, '&#039;');
-          const safeCol = escapeHtml(col.replace(/_/g, ' '));
           td.innerHTML = `
             <div class="flex items-start gap-1">
               <span class="conf-dot ${confClass}" title="Confidence: ${Math.round(conf*100)}%"></span>
-              <span class="cell-expandable" onclick="expandCell(this,'${safeCol}','${safeFullVal}')">
+              <span class="cell-expandable"
+                data-col="${escapeHtml(col.replace(/_/g, ' '))}"
+                data-val="${escapeHtml(val)}"
+                onclick="expandCell(this)">
                 ${starPrefix}${displayVal}<span class="show-more-hint">expand</span>
               </span>
               ${badges}
@@ -434,7 +437,13 @@ function escapeHtml(str) {
 
 // ── Inline cell expand ────────────────────────────────────────────────────────
 
-function expandCell(triggerEl, colName, fullText) {
+function showSourceFromEl(el) {
+  showSource(el.dataset.url, el.dataset.title, el.dataset.snippet);
+}
+
+function expandCell(triggerEl) {
+  const colName = triggerEl.dataset.col || '';
+  const fullText = triggerEl.dataset.val || '';
   const row = triggerEl.closest('tr');
   const colCount = row.closest('table').querySelectorAll('thead th').length || row.cells.length;
 
