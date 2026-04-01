@@ -1,6 +1,6 @@
 /* ── Fonts ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-* { font-family: 'DM Sans', sans-serif; }
+* { font-family: 'Roboto', sans-serif; }
 h1, h2, h3, .font-syne { font-family: 'Syne', sans-serif; }
 code, .mono { font-family: 'DM Mono', monospace; }
 
@@ -190,7 +190,7 @@ nav {
 .nav-link-btn {
   font-size: 12px; color: var(--text2); letter-spacing: 0.3px;
   background: none; border: none; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; transition: color 0.2s;
+  font-family: 'Roboto', sans-serif; transition: color 0.2s;
   display: flex; align-items: center; gap: 5px;
 }
 .nav-link-btn:hover { color: var(--text); }
@@ -228,10 +228,11 @@ main > * { width: 100%; }
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 .eyebrow {
-  font-family: 'DM Mono', monospace; font-size: 11px;
+  font-family: 'Roboto', sans-serif; font-size: 14px;
   letter-spacing: 3px; text-transform: uppercase;
   color: var(--highlight); margin-bottom: 16px;
   display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-weight: 600;
 }
 .eyebrow::before {
   content: ''; display: inline-block;
@@ -247,8 +248,8 @@ main > * { width: 100%; }
 .hero-title span { color: var(--highlight); }
 
 .hero-sub {
-  font-size: 14px; color: var(--text2); line-height: 1.9;
-  max-width: 520px; margin-bottom: 28px; font-weight: 300;
+  font-size: 15px; color: var(--text2); line-height: 1.9;
+  max-width: 520px; margin-bottom: 28px; font-weight: 400;
   text-align: center; margin-left: auto; margin-right: auto;
 }
 
@@ -264,8 +265,8 @@ textarea {
   background: rgba(255,255,255,0.06) !important; color: var(--text) !important;
   border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 10px !important;
   outline: none !important; padding: 10px 12px !important;
-  font-family: 'DM Sans', sans-serif !important; font-size: 14px !important;
-  resize: none; width: 100%; line-height: 1.65; font-weight: 300;
+  font-family: 'Roboto', sans-serif !important; font-size: 14px !important;
+  resize: none; width: 100%; line-height: 1.65; font-weight: 400;
   transition: border-color 0.2s !important;
 }
 textarea:focus { border-color: var(--highlight) !important; }
@@ -299,10 +300,11 @@ textarea::placeholder { color: var(--text3) !important; }
 select, input[type="text"] {
   background: rgba(255,255,255,0.06) !important; color: var(--text) !important;
   border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 8px !important;
-  font-family: 'DM Mono', monospace !important;
-  font-size: 11px !important; letter-spacing: 0.3px !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 12px !important; letter-spacing: 0.3px !important;
   outline: none !important; height: 38px !important; padding: 0 10px !important;
   box-sizing: border-box !important;
+  font-weight: 500 !important;
 }
 
 /* Dropdown arrow styling */
@@ -336,7 +338,7 @@ select {
 .btn-primary {
   background: var(--highlight); color: var(--bg);
   padding: 0 22px; height: 38px; box-sizing: border-box;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 600;
   border: 1px solid var(--highlight); border-radius: 8px; cursor: pointer;
   transition: all 0.22s; display: inline-flex; align-items: center; gap: 8px;
 }
@@ -346,28 +348,31 @@ select {
 /* Secondary button (portfolio .btns) */
 .btn-secondary {
   background: transparent; color: var(--text2);
-  padding: 8px 14px; font-family: 'DM Mono', monospace;
-  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 8px 14px; font-family: 'Roboto', sans-serif;
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
   border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
   transition: all 0.22s; display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 500;
 }
 .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
 
 /* Example pills */
 .ex-pill {
   background: var(--tag-bg); border: 1px solid var(--tag-border);
-  color: var(--tag-text); font-family: 'DM Mono', monospace;
-  font-size: 10px; letter-spacing: 0.3px; padding: 4px 12px;
+  color: var(--tag-text); font-family: 'Roboto', sans-serif;
+  font-size: 11px; letter-spacing: 0.3px; padding: 4px 12px;
   cursor: pointer; transition: all 0.2s;
+  font-weight: 500;
 }
 .ex-pill:hover { border-color: var(--highlight); color: var(--highlight); }
 
 /* ── Section label (portfolio shead style) ───────────────────────────────── */
 .section-label {
-  font-family: 'DM Mono', monospace; font-size: 9.5px;
+  font-family: 'Roboto', sans-serif; font-size: 12px;
   letter-spacing: 2px; text-transform: uppercase;
   color: var(--highlight); margin-bottom: 16px;
   display: flex; align-items: center; gap: 14px;
+  font-weight: 600;
 }
 .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
@@ -391,11 +396,11 @@ select {
 .src-badge {
   display: inline-flex; align-items: center; justify-content: center;
   width: 15px; height: 15px; border-radius: 50%;
-  font-size: 9px; font-weight: 700; cursor: pointer;
+  font-size: 10px; font-weight: 700; cursor: pointer;
   background: var(--tag-bg); color: var(--highlight);
   border: 1px solid var(--tag-border);
   margin-left: 3px; vertical-align: super;
-  transition: background 0.15s; font-family: 'DM Mono', monospace;
+  transition: background 0.15s; font-family: 'Roboto', sans-serif;
 }
 .src-badge:hover { background: var(--highlight); color: var(--bg); border-color: var(--highlight); }
 
@@ -416,25 +421,25 @@ select {
 .result-table th {
   position: sticky; top: 0; z-index: 10;
   background: var(--bg2);
-  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 1.5px;
   color: var(--highlight); padding: 10px 16px; white-space: nowrap;
   border-bottom: 1px solid var(--border);
 }
 
 .result-table td {
-  padding: 10px 16px; font-size: 13px; color: var(--text2);
+  padding: 10px 16px; font-size: 14px; color: var(--text2);
   border-bottom: 1px solid var(--border); max-width: 260px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  vertical-align: middle; font-weight: 300;
+  vertical-align: middle; font-weight: 400;
 }
 
 .result-table tr:hover td { background: var(--bg2); }
 .result-table td.name-cell {
-  font-family: 'Syne', sans-serif; font-weight: 600;
-  color: var(--text); font-size: 13px;
+  font-family: 'Roboto', sans-serif; font-weight: 700;
+  color: var(--text); font-size: 14px;
 }
-.null-cell { color: var(--text3); font-style: italic; font-family: 'DM Mono', monospace; font-size: 11px; }
+.null-cell { color: var(--text3); font-style: italic; font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 400; }
 
 /* Card with pcard hover bar (for progress/preview sections) */
 .app-card {
@@ -468,8 +473,8 @@ select {
 .cell-expandable { cursor: pointer; }
 .cell-expandable:hover .show-more-hint { opacity: 1; }
 .show-more-hint {
-  opacity: 0; font-family: 'DM Mono', monospace; font-size: 9px;
-  color: var(--highlight); font-weight: 500;
+  opacity: 0; font-family: 'Roboto', sans-serif; font-size: 10px;
+  color: var(--highlight); font-weight: 600;
   margin-left: 6px; white-space: nowrap; transition: opacity 0.15s;
   text-transform: uppercase; letter-spacing: 1px; text-decoration: underline;
 }
@@ -484,14 +489,15 @@ select {
 }
 .expanded-detail-row.open .expanded-detail-inner { max-height: 300px; padding: 14px 16px; }
 .expanded-col-label {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px;
+  font-family: 'Roboto', sans-serif; font-size: 10px; letter-spacing: 2px;
   text-transform: uppercase; color: var(--highlight); margin-bottom: 8px;
   display: flex; align-items: center; gap: 8px;
+  font-weight: 600;
 }
 .expanded-col-label::before { content: ''; width: 14px; height: 1px; background: var(--highlight); }
 .expanded-detail-text {
-  font-size: 13px; color: var(--text2); line-height: 1.82;
-  white-space: pre-wrap; word-break: break-word; font-weight: 300;
+  font-size: 14px; color: var(--text2); line-height: 1.82;
+  white-space: pre-wrap; word-break: break-word; font-weight: 400;
 }
 .expanded-close-btn {
   color: var(--text3); flex-shrink: 0; padding: 2px;
@@ -520,8 +526,8 @@ footer.footer {
 }
 
 .footer-left, .footer-right {
-  font-family: 'DM Mono', monospace; font-size: 11px;
-  letter-spacing: 0.5px; color: var(--text2); font-weight: 400;
+  font-family: 'Roboto', sans-serif; font-size: 12px;
+  letter-spacing: 0.5px; color: var(--text2); font-weight: 500;
 }
 
 .footer-left { text-align: left; }
