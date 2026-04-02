@@ -158,7 +158,7 @@ async def search_endpoint(request: SearchRequest):
                         break
 
             # 7. LLM gap-fill — last-resort pass for still-missing values
-            await send_progress("analyzing", "Filling remaining gaps from LLM knowledge…", 0.97)
+            await send_progress("filling", "Filling remaining gaps from LLM knowledge", 0.97)
             all_entities = await llm_fill_gaps(
                 cerebras_client, all_entities, plan.columns, plan.entity_type
             )

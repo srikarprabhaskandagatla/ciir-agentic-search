@@ -45,6 +45,7 @@ const STAGES = [
   { id: 'extracting', label: 'Extract', icon: '⚗️'  },
   { id: 'resolving',  label: 'Resolve', icon: '🔗' },
   { id: 'analyzing',  label: 'Analyse', icon: '📊' },
+  { id: 'filling',    label: 'LLM Fill', icon: '🤖' },
 ];
 
 function buildPipelineSteps() {
@@ -222,7 +223,7 @@ function renderResults(data) {
   );
   document.getElementById('sourcesText').textContent =
     `Every highlighted value traces to a source. Click the blue badges (①②③) to see the exact excerpt.` +
-    (hasLLMFilled ? '  ★ Starred values are LLM estimates and may be inaccurate.' : '');
+    (hasLLMFilled ? '  * Starred values are LLM estimates and may be inaccurate.' : '');
 
   // Build column list: skip 'name' from columns since it's rendered first anyway
   const allCols = columns;
@@ -269,10 +270,10 @@ function renderResults(data) {
             title="${escapeHtml(src.title || src.url)}">${srcIdx + 1}</span>`;
         }).join('');
 
-        const starPrefix = isLLMFilled ? `<span class="llm-star" title="LLM estimate — may be inaccurate">★</span> ` : '';
+        const starPrefix = isLLMFilled ? `<span class="llm-star" title="LLM estimate — may be inaccurate">*</span> ` : '';
         const TRUNCATE = 72;
-        const isLong = col !== 'name' && val.length > TRUNCATE;
-        const displayVal = isLong ? escapeHtml(val.slice(0, TRUNCATE)) + '…' : escapeHtml(val);
+        const isLong = col !== 'name' && (col === 'description' || val.length > TRUNCATE);
+        const displayVal = isLong && val.length > TRUNCATE ? escapeHtml(val.slice(0, TRUNCATE)) + '…' : escapeHtml(val);
 
         td.className = col === 'name' ? 'name-cell' : '';
 
@@ -307,6 +308,19 @@ function renderResults(data) {
 
     tbody.appendChild(tr);
   });
+
+  // Confidence legend (rendered once after the table)
+  const existingLegend = document.getElementById('confLegend');
+  if (existingLegend) existingLegend.remove();
+  const legend = document.createElement('div');
+  legend.id = 'confLegend';
+  legend.className = 'conf-legend';
+  legend.innerHTML = `
+    <span class="conf-legend-label">Confidence:</span>
+    <span class="conf-legend-item"><span class="conf-dot conf-high"></span> ≥ 85% — High</span>
+    <span class="conf-legend-item"><span class="conf-dot conf-mid"></span> 65–84% — Medium</span>
+    <span class="conf-legend-item"><span class="conf-dot conf-low"></span> &lt; 65% — Low</span>`;
+  document.getElementById('sourcesFooter').after(legend);
 
   document.getElementById('resultsSection').classList.add('fade-in');
 }
@@ -486,7 +500,8 @@ function expandCell(triggerEl) {
   });
 
   row.after(expandedRow);
-  requestAnimationFrame(() => expandedRow.classList.add('open'));
+  expandedRow.getBoundingClientRect(); // force reflow so CSS transition fires
+  expandedRow.classList.add('open');
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────

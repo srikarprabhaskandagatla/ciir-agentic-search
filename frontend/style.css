@@ -213,7 +213,7 @@ nav {
 
 /* ── Main layout ──────────────────────────────────────────────────────────── */
 main {
-  max-width: 720px; margin: 0 auto;
+  max-width: 1200px; margin: 0 auto;
   padding: 40px 40px 100px;
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center;
@@ -499,7 +499,7 @@ select {
 }
 
 /* ── Inline expanded detail row ───────────────────────────────────────────── */
-.expanded-detail-row > td { padding: 0 !important; border-bottom: none !important; background: transparent !important; }
+.expanded-detail-row > td { padding: 0 !important; border-bottom: none !important; background: transparent !important; overflow: visible !important; white-space: normal !important; max-width: none !important; }
 .expanded-detail-inner {
   max-height: 0; overflow: hidden; padding: 0 16px;
   background: var(--bg2); border-left: 2px solid var(--highlight);
@@ -523,6 +523,17 @@ select {
   background: none; border: none; cursor: pointer; transition: color 0.15s;
 }
 .expanded-close-btn:hover { color: var(--text); }
+
+/* ── Confidence legend ────────────────────────────────────────────────────── */
+.conf-legend {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin-top: 10px;
+  font-family: 'Roboto', sans-serif; font-size: 11px; color: var(--text3);
+}
+.conf-legend-label {
+  font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;
+}
+.conf-legend-item { display: flex; align-items: center; gap: 5px; }
 
 /* ── Fade in ──────────────────────────────────────────────────────────────── */
 .fade-in { animation: fadeIn 0.4s ease; }
