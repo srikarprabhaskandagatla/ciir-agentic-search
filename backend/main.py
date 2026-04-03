@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from backend.models import SearchResult, EntityTable
+from backend.models import SearchResult, EntityTable, ScrapedPage
 from backend.pipeline import scraper, resolver, gap_analyzer
 from backend.pipeline.planner import plan_search
 from backend.pipeline.searcher import fetch_web_results
@@ -126,6 +126,16 @@ async def search_endpoint(request: SearchRequest):
                 # 3. Scrape
                 await send_progress("scraping", f"{rl}: Fetching {len(new_results)} pages", rp(0.22))
                 pages = await scraper.scrape_urls([r.url for r in new_results])
+
+                # Fallback: use Tavily snippets for any URL that failed to scrape.
+                # This is critical on cloud hosts (Railway) where datacenter IPs are
+                # blocked by sites — at least the pre-extracted Tavily snippet is usable.
+                if len(pages) < len(new_results):
+                    scraped_urls = {p.url for p in pages}
+                    for r in new_results:
+                        if r.url not in scraped_urls and len(r.snippet) >= 80:
+                            pages.append(ScrapedPage(url=r.url, title=r.title, content=r.snippet))
+
                 await send_progress("scraping", f"{rl}: Scraped {len(pages)} pages successfully", rp(0.40))
                 if not pages:
                     break
