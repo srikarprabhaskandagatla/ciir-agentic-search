@@ -1,4 +1,4 @@
-# These tests use mocked HTTP and API responses — no real API keys needed.
+# These tests use mocked HTTP and API responses - no real API keys needed.
 # Run with: pytest tests/ -v
 
 import asyncio, json, pytest
