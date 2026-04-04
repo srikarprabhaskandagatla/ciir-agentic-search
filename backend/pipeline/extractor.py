@@ -1,19 +1,16 @@
-# Stage 4 - Extractor  (uses Cerebras / Llama 3.3 70B)
+# Stage 4 - Extractor 
 
 from __future__ import annotations
-import asyncio
-import uuid
-import logging
-
+import asyncio, uuid, logging
 from cerebras.cloud.sdk import AsyncCerebras
 from ..models import Entity, CellValue, ScrapedPage, SourceRef
 from .utils import extract_json_obj
 
 logger = logging.getLogger(__name__)
 
-_MAX_CONCURRENT_EXTRACTIONS = 8  # Cerebras handles high concurrency well
+MAX_CONCURRENT_EXTRACTIONS = 8  # Cerebras handles high concurrency well
 
-_SYSTEM = """You are a precise information extraction engine.
+EXTRACTOR_SYSTEM_PROMPT = """You are a precise information extraction engine.
 
 Given a web page and a list of columns, extract ALL entities that belong to the target entity type.
 
@@ -35,7 +32,7 @@ Respond with ONLY a raw JSON object - no markdown, no preamble:
   ]
 }"""
 
-_USER_TEMPLATE = """\
+USER_TEMPLATE = """\
 Extract all {entity_type} entities from this page.
 Columns: {columns}
 
@@ -45,7 +42,6 @@ Title: {title}
 CONTENT:
 {content}
 """
-
 
 async def _extract_from_page(
     client: AsyncCerebras,
@@ -62,8 +58,8 @@ async def _extract_from_page(
             response = await client.chat.completions.create(
                 model="qwen-3-235b-a22b-instruct-2507",
                 messages=[
-                    {"role": "system", "content": _SYSTEM},
-                    {"role": "user", "content": _USER_TEMPLATE.format(
+                    {"role": "system", "content": EXTRACTOR_SYSTEM_PROMPT},
+                    {"role": "user", "content": USER_TEMPLATE.format(
                         entity_type=entity_type,
                         columns=", ".join(columns),
                         url=page.url,
@@ -120,7 +116,7 @@ async def extract_from_pages(
     columns: list[str],
     entity_type: str,
 ) -> list[Entity]:
-    semaphore = asyncio.Semaphore(_MAX_CONCURRENT_EXTRACTIONS)
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_EXTRACTIONS)
     tasks = [
         _extract_from_page(client, page, columns, entity_type, semaphore)
         for page in pages

@@ -1,33 +1,19 @@
 # Stage 3 - Scraper
-
-# Takes a list of URLs, fetches them concurrently (bounded by a semaphore),
-# strips boilerplate HTML, and returns clean text content.
-
-# Features:
-#   - In-memory URL cache - never re-fetches within a session
-#   - Smart content extraction: prefers <article>/<main> over full <body>
-#   - Hard-caps content at 8 000 chars to keep extraction prompts cheap
-#   - Gracefully skips binary files, non-HTML content, and errors
-
+# Takes a list of URLs, fetches them concurrently (bounded by a semaphore), strips boilerplate HTML, and returns clean text content.
 
 from __future__ import annotations
-import asyncio
-import logging
-import re
+import asyncio, logging, re, httpx
 from urllib.parse import urlparse
-
-import httpx
 from bs4 import BeautifulSoup
 
 from ..models import ScrapedPage
 
 logger = logging.getLogger(__name__)
 
-
 # Configuration
-MAX_CONCURRENT = 6          # simultaneous HTTP connections
-REQUEST_TIMEOUT = 12.0      # seconds per request
-MAX_CONTENT_CHARS = 8_000   # truncation limit (keeps LLM costs down)
+MAX_CONCURRENT = 6          
+REQUEST_TIMEOUT = 12.0      
+MAX_CONTENT_CHARS = 8_000   
 
 SKIP_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
@@ -45,12 +31,9 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-# Module-level cache - shared across all requests in a process lifetime
 _url_cache: dict[str, ScrapedPage] = {}
 
-
-# HTML cleaning
-_JUNK_TAGS = [
+JUNK_TAGS = [
     "script", "style", "nav", "footer", "header", "aside",
     "iframe", "noscript", "form", "button", "svg", "figure",
     "advertisement", "ads", "cookie-banner",
@@ -58,7 +41,6 @@ _JUNK_TAGS = [
 
 
 def _clean_html(html: str, url: str) -> tuple[str, str]:
-    """Return (title, clean_text) from raw HTML."""
     soup = BeautifulSoup(html, "lxml")
 
     title = ""
@@ -66,7 +48,7 @@ def _clean_html(html: str, url: str) -> tuple[str, str]:
         title = soup.title.string.strip()
 
     # Remove boilerplate elements
-    for tag in soup.find_all(_JUNK_TAGS):
+    for tag in soup.find_all(JUNK_TAGS):
         tag.decompose()
 
     # Prefer semantic content containers
@@ -83,15 +65,11 @@ def _clean_html(html: str, url: str) -> tuple[str, str]:
     else:
         raw_text = soup.get_text(separator="\n", strip=True)
 
-    # Collapse whitespace
     lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
-    # Drop very short noise lines (navigation crumbs etc.)
     lines = [l for l in lines if len(l) > 20 or l.endswith(":")]
     text = "\n".join(lines)
 
     return title, text[:MAX_CONTENT_CHARS]
-
-
 
 # Single-URL fetcher
 def _should_skip(url: str) -> bool:
@@ -100,7 +78,6 @@ def _should_skip(url: str) -> bool:
 
 
 async def _fetch_one(client: httpx.AsyncClient, url: str) -> ScrapedPage:
-    """Fetch and clean a single URL.  Returns ScrapedPage (possibly with error)."""
 
     if url in _url_cache:
         logger.debug("Cache hit: %s", url)
@@ -130,11 +107,7 @@ async def _fetch_one(client: httpx.AsyncClient, url: str) -> ScrapedPage:
     except Exception as exc:
         return ScrapedPage(url=url, content="", error=str(exc)[:120])
 
-
-
-# Public API
 async def scrape_urls(urls: list[str]) -> list[ScrapedPage]:
-    """Scrape a list of URLs concurrently.  Returns only successful pages."""
     if not urls:
         return []
 
@@ -154,7 +127,5 @@ async def scrape_urls(urls: list[str]) -> list[ScrapedPage]:
     )
     return successful
 
-
 def clear_cache() -> None:
-    """Clear the in-memory scrape cache (useful between test runs)."""
     _url_cache.clear()

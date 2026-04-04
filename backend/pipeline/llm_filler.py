@@ -1,22 +1,15 @@
-"""
-Stage 7 — LLM Knowledge Filler
-
-Last-resort pass that asks the LLM to fill remaining null cells from its
-parametric knowledge. Filled values are marked llm_filled=True so the
-frontend can star them and show a disclaimer.
-"""
+# Stage 7 - LLM Knowledge Filler
+# Last-resort pass that asks the LLM to fill remaining null cells from its parametric knowledge. 
 
 from __future__ import annotations
-import json
-import logging
-
+import json, logging
 from cerebras.cloud.sdk import AsyncCerebras
 from ..models import Entity, CellValue
 from .utils import extract_json_arr
 
 logger = logging.getLogger(__name__)
 
-_MODEL = "qwen-3-235b-a22b-instruct-2507"
+MODEL = "qwen-3-235b-a22b-instruct-2507"
 
 
 async def llm_fill_gaps(
@@ -25,12 +18,6 @@ async def llm_fill_gaps(
     columns: list[str],
     entity_type: str,
 ) -> list[Entity]:
-    """
-    For each entity that has null cells, ask the LLM to fill them from
-    parametric knowledge. Returns the same entity list with gaps filled where
-    the LLM had knowledge (confidence 0.5, llm_filled=True, no sources).
-    """
-    # Build the work list: only entities that have at least one missing column
     non_name_cols = [c for c in columns if c != "name"]
     work = []
     for entity in entities:
@@ -44,7 +31,6 @@ async def llm_fill_gaps(
     if not work:
         return entities
 
-    # Build a compact payload for the LLM
     payload = []
     for entity, missing_cols in work:
         known = {
@@ -73,7 +59,7 @@ async def llm_fill_gaps(
 
     try:
         resp = await client.chat.completions.create(
-            model=_MODEL,
+            model=MODEL,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=1500,
             temperature=0.1,
@@ -86,7 +72,6 @@ async def llm_fill_gaps(
         logger.warning("LLM filler failed: %s", exc)
         return entities
 
-    # Map by name for O(1) lookup
     fill_map: dict[str, dict] = {
         item["name"]: item
         for item in filled_list

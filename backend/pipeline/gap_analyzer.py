@@ -1,18 +1,11 @@
-# Stage 6 — Gap Analyzer  (the "agentic" component)
-
+# Stage 6 - Gap Analyzer  (the "agentic" component)
 # After Round 1, we inspect the partially-filled table:
-#   • Which columns have low coverage? (< 50% of entities have a value)
-#   • Which entities have many null cells?
-#   • Are there too few entities overall?
-
-# If there are meaningful gaps, we generate targeted follow-up queries for Round 2.
-# This is what transforms a simple pipeline into a genuine agentic system —
-# the output of one pass feeds back into the search plan for the next pass.
+#   - Which columns have low coverage? (< 50% of entities have a value)
+#   - Which entities have many null cells?
+#   - Are there too few entities overall?
 
 from __future__ import annotations
-import json
-import logging
-
+import json, logging
 from cerebras.cloud.sdk import AsyncCerebras
 from ..models import Entity, CellValue
 from .utils import extract_json_obj
@@ -20,7 +13,7 @@ from .utils import extract_json_obj
 logger = logging.getLogger(__name__)
 
 
-_SYSTEM = """You are a data completeness analyst.
+GAP_ANALYZER_SYSTEM_PROMPT = """You are a data completeness analyst.
 
 You will receive a partially-filled entity table and must:
 1. Identify columns with low coverage (< 50% filled)
@@ -115,7 +108,7 @@ Generate per-entity queries to fill the missing attributes."""
         response = await client.chat.completions.create(
             model="qwen-3-235b-a22b-instruct-2507",
             messages=[
-                {"role": "system", "content": _SYSTEM},
+                {"role": "system", "content": GAP_ANALYZER_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ],
             max_tokens=512,

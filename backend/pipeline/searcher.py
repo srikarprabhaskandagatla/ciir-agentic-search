@@ -1,4 +1,4 @@
-# Stage 2 - Searcher  (uses Tavily - free tier, 1000 searches/month)
+# Stage 2 - Searcher
 
 from __future__ import annotations
 import logging

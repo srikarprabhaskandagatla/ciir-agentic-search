@@ -1,23 +1,15 @@
-# Stage 5 — Resolver
-
+# Stage 5 - Resolver
 # Deduplicate and merge entities from across all pages.
-#   - Fast path: exact name normalisation deduplication (lowercase, strip punctuation)
-#   - Slow path (when fast path leaves ambiguity): Llama groups remaining near-duplicates
-#   - Merge: for each column, pick the highest-confidence value, union all sources
 
 from __future__ import annotations
-import json
-import re
-import logging
-import unicodedata
-
+import json, re, unicodedata, logging
 from cerebras.cloud.sdk import AsyncCerebras
 from ..models import Entity, CellValue, SourceRef
 from .utils import extract_json_obj
 
 logger = logging.getLogger(__name__)
 
-_MAX_ENTITIES_OUT = 10
+MAX_ENTITIES_OUT = 10
 
 
 def _normalise_name(name: str) -> str:
@@ -71,7 +63,7 @@ def _fast_dedup(entities: list[Entity]) -> list[list[Entity]]:
     return list(groups.values())
 
 
-_DEDUP_SYSTEM = """You are deduplicating a list of entity names.
+DEDUP_SYSTEM = """You are deduplicating a list of entity names.
 Some entries may be near-duplicates (same company, different formatting).
 Group them.
 
@@ -90,7 +82,7 @@ async def _llm_dedup(client: AsyncCerebras, name_index: list[dict]) -> list[list
     response = await client.chat.completions.create(
         model="qwen-3-235b-a22b-instruct-2507",
         messages=[
-            {"role": "system", "content": _DEDUP_SYSTEM},
+            {"role": "system", "content": DEDUP_SYSTEM},
             {"role": "user", "content": f"Deduplicate:\n{json.dumps(name_index, indent=2)}"},
         ],
         max_tokens=1024,
@@ -135,4 +127,4 @@ async def resolve_entities(client: AsyncCerebras, raw_entities: list[Entity]) ->
 
     resolved.sort(key=lambda e: str(e.cells.get("name", CellValue(value="zzz", sources=[])).value).lower())
     logger.info("Resolved to %d unique entities", len(resolved))
-    return resolved[:_MAX_ENTITIES_OUT]
+    return resolved[:MAX_ENTITIES_OUT]
