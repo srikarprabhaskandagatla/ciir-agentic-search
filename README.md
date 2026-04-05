@@ -1,26 +1,57 @@
-# CIIR Agentic AI Search
+<h1 align="center">
+  <br>
+  CIIR Agentic Search
+  <br>
+</h1>
 
-A multi-stage, agentic web research system. You type a natural language query like *"AI startups in healthcare"* and get back a clean, structured table with sourced data - every cell linked to the exact web page excerpt that proves it.
+<h4 align="center">A 7-stage agentic web research pipeline that turns a natural language query into a sourced, structured data table.</h4>
 
-**Live Demo:** [https://srikarprabhaskandagatla.github.io/ciir-agentic-search/](https://srikarprabhaskandagatla.github.io/ciir-agentic-search/)
+<p align="center">
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
+  </a>
+  <a href="https://fastapi.tiangolo.com/">
+    <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
+  </a>
+  <a href="https://www.cerebras.ai/">
+    <img src="https://img.shields.io/badge/-Cerebras%20LLM-FF6B35?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+" alt="Cerebras">
+  </a>
+  <a href="https://tavily.com/">
+    <img src="https://img.shields.io/badge/-Tavily%20Search-4A90D9?style=flat-square&logo=googlesearchconsole&logoColor=white" alt="Tavily">
+  </a>
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">
+    <img src="https://img.shields.io/badge/-JavaScript-grey?style=flat-square&logo=javascript&logoColor=F7DF1E" alt="JavaScript">
+  </a>
+  <a href="https://railway.app/">
+    <img src="https://img.shields.io/badge/-Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white" alt="Railway">
+  </a>
+</p>
 
-The frontend is hosted on GitHub Pages. The backend is deployed on Railway (free tier)
-and is connected to the live frontend above. You can also run the backend locally
-by following the setup instructions and pointing the frontend to `http://localhost:8000`.
+<p align="center">
+  <a href="#what-it-does">What It Does</a>
+  •
+  <a href="#setup-instructions">Setup Instructions</a>
+  •
+  <a href="#architecture-overview">Architecture</a>
+  •
+  <a href="#backend">Backend</a>
+  •
+  <a href="#frontend">Frontend</a>
+  •
+  <a href="#tests">Tests</a>
+  •
+  <a href="#output-quality">Output Quality</a>
+  •
+  <a href="#design-choices-and-trade-offs">Design Choices</a>
+  •
+  <a href="#known-limitations">Known Limitations</a>
+</p>
 
----
-
-## Table of Contents
-
-1. [What It Does](#what-it-does)
-2. [Setup Instructions](#setup-instructions)
-3. [Architecture Overview](#architecture-overview)
-4. [Backend](#backend)
-5. [Frontend](#frontend)
-6. [Tests](#tests)
-7. [Output Quality](#output-quality)
-8. [Design Choices and Trade-offs](#design-choices-and-trade-offs)
-9. [Known Limitations](#known-limitations)
+<p align="center">
+  <strong>Live Demo:</strong> <a href="https://srikarprabhaskandagatla.github.io/ciir-agentic-search/">https://srikarprabhaskandagatla.github.io/ciir-agentic-search/</a>
+  <br>
+  <sub>Frontend on GitHub Pages · Backend on Railway</sub>
+</p>
 
 ---
 
@@ -51,7 +82,8 @@ cp backend/.env.example backend/.env
 uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
 # 4. Open the app
-# Open frontend/index.html in a browser, or serve it via any static server.
+# Open frontend/index.html in a browser, or serve it via any static server. You can also run the backend locally
+# by following the setup instructions and pointing the frontend to `http://localhost:8000`
 ```
 
 **Run tests:**
