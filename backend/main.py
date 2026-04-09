@@ -144,7 +144,7 @@ async def search_endpoint(request: SearchRequest):
                     break
 
                 # 4. Extract
-                await send_progress("extracting", f"{rl}: Extracting entities with Llama 3.3", rp(0.45))
+                await send_progress("extracting", f"{rl}: Extracting entities with Qwen 3 235b", rp(0.45))
                 new_raw = await extract_from_pages(cerebras_client, pages, plan.columns, plan.entity_type)
                 await send_progress("extracting", f"{rl}: Found {len(new_raw)} entity mentions", rp(0.65))
                 all_entities.extend(new_raw)
