@@ -39,9 +39,11 @@ def _merge_cells(cells_list: list[CellValue]) -> CellValue:
 def _merge_entity_group(entities: list[Entity]) -> Entity:
     if len(entities) == 1:
         return entities[0]
+    
     all_columns: set[str] = set()
     for e in entities:
         all_columns.update(e.cells.keys())
+        
     merged_cells: dict[str, CellValue] = {}
     for col in all_columns:
         candidates = [e.cells[col] for e in entities if col in e.cells]

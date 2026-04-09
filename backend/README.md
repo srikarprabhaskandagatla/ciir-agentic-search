@@ -916,24 +916,94 @@ for col in all_columns:
 #   only Tony's site entity had it
 ```
 
-`_merge_cells()` selects the highest-confidence `CellValue` and aggregates all sources:
+`_merge_cells()` selects the highest-confidence `CellValue` and aggregates all sources.
+
+Here is a step-by-step example for the `"price_range"` column of Tony's Pizza Napoletana,
+which was found on two different pages with different values:
 
 ```python
-def _merge_cells(cells_list: list[CellValue]) -> CellValue:
-    best = max(cells_list, key=lambda c: c.confidence)
-    # For "price_range": both are 0.97, so first wins: CellValue("$18-$28")
+# Input — two CellValues for the same column, from two different pages:
+cells_list = [
+    CellValue(
+        value      = "$18-$28",
+        confidence = 0.97,
+        sources    = [SourceRef(url="https://sf.eater.com/maps/best-pizza-sf",
+                                snippet="Prices range from $18-$28 for a pie")],
+    ),
+    CellValue(
+        value      = "$26",
+        confidence = 0.97,
+        sources    = [SourceRef(url="https://www.tonysitaliankitchen.com",
+                                snippet="coal-fired New York-style pizza at $26")],
+    ),
+]
+```
 
-    all_sources = []
-    seen_source_urls = set()
-    for c in cells_list:
-        for src in c.sources:
-            if src.url not in seen_source_urls:
-                seen_source_urls.add(src.url)
-                all_sources.append(src)
-    # all_sources = [eater_ref, tonys_ref]  — both URLs kept
+**Step 1 — find the best cell by highest confidence:**
 
-    return CellValue(value=best.value, confidence=best.confidence,
-                     sources=all_sources, llm_filled=best.llm_filled)
+```python
+best = max(cells_list, key=lambda c: c.confidence)
+# compares 0.97 vs 0.97 — tied, so max() picks the first one
+# best = CellValue(value="$18-$28", confidence=0.97, sources=[eater_ref])
+```
+
+**Step 2 — collect all sources from every cell, deduped by URL:**
+
+```python
+all_sources = []
+seen_source_urls = set()
+
+# Iteration 1: cell = CellValue("$18-$28", sources=[eater_ref])
+for src in cell.sources:
+    # src.url = "https://sf.eater.com/maps/best-pizza-sf"
+    # not in seen_source_urls yet → add it
+    seen_source_urls.add(src.url)
+    all_sources.append(src)
+# all_sources = [eater_ref]
+
+# Iteration 2: cell = CellValue("$26", sources=[tonys_ref])
+for src in cell.sources:
+    # src.url = "https://www.tonysitaliankitchen.com"
+    # not in seen_source_urls yet → add it
+    seen_source_urls.add(src.url)
+    all_sources.append(src)
+# all_sources = [eater_ref, tonys_ref]
+```
+
+If the same URL appeared in both cells it would be skipped on the second pass —
+`seen_source_urls` prevents duplicate source entries.
+
+**Step 3 — return a new CellValue: value from the winner, sources from everyone:**
+
+```python
+return CellValue(
+    value      = "$18-$28",          # from best (highest confidence)
+    confidence = 0.97,               # from best
+    sources    = [eater_ref, tonys_ref],  # merged from ALL cells
+    llm_filled = False,              # from best
+)
+# The winning value "$18-$28" is used, but the cell now cites both pages as evidence.
+```
+
+Now a second example where confidences differ — `"description"` column:
+
+```python
+cells_list = [
+    CellValue(value="Multi-style pizzeria voted best pizza in America", confidence=0.95,
+              sources=[eater_ref]),
+    CellValue(value="Multi-style pizzeria voted best pizza in America", confidence=0.92,
+              sources=[tonys_ref]),
+]
+
+best = max(cells_list, key=lambda c: c.confidence)
+# 0.95 > 0.92 → first cell wins clearly
+
+return CellValue(
+    value      = "Multi-style pizzeria voted best pizza in America",
+    confidence = 0.95,
+    sources    = [eater_ref, tonys_ref],   # both sources kept
+)
+# Same value happened to appear on both pages — confidence 0.95 is kept, both sources cited.
 ```
 
 ### Merged result for Tony's Pizza Napoletana
