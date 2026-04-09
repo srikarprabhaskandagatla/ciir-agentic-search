@@ -850,7 +850,7 @@ groups = {
 The normalized string key was only used for matching — it is discarded.
 
 ```python
-[
+fast_groups = [
     [
         Entity(id="a1b2-c3d4", cells={"name": CellValue("Tony's Pizza Napoletana"), "description": ..., "neighborhood": ..., "price_range": ...,               }),  # from Eater SF
         Entity(id="m3n4-o5p6", cells={"name": CellValue("Tony's Pizza Napoletana"), "neighborhood": ..., "price_range": ...,  "signature_pizza": ...,           }),  # from Tony's site
