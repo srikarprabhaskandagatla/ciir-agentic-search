@@ -180,7 +180,7 @@ async def search_endpoint(request: SearchRequest):
             # 8. Constraint-based ranking — mandatory: constraint-satisfying
             #    entities always surface to the top regardless of order.
             await send_progress("ranking", "Ranking results by query constraints", 0.98)
-            all_entities = await extract_and_rank(
+            all_entities, ranking_info = await extract_and_rank(
                 cerebras_client, all_entities, plan.columns, request.query
             )
 
@@ -198,6 +198,7 @@ async def search_endpoint(request: SearchRequest):
                 sources_consulted=[r.url for r in all_search_results],
                 search_queries_used=all_queries_used,
                 rounds_completed=completed_rounds,
+                ranking=ranking_info,
             )
             await queue.put({"type": "result", "data": result.model_dump(mode="json")})
 

@@ -59,6 +59,13 @@ class ScrapedPage(BaseModel):
     error: Optional[str] = None
 
 
+# Ranking metadata attached to the final result
+class RankingInfo(BaseModel):
+    total: int                        # total number of constraints extracted
+    labels: list[str]                 # human-readable constraint descriptions
+    scores: dict[str, int]           # entity_id → n constraints satisfied
+
+
 # Final output
 class EntityTable(BaseModel):
     query: str
@@ -68,6 +75,7 @@ class EntityTable(BaseModel):
     sources_consulted: list[str]
     search_queries_used: list[str]
     rounds_completed: int
+    ranking: Optional[RankingInfo] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     @property

@@ -46,6 +46,7 @@ const STAGES = [
   { id: 'resolving',  label: 'Resolve', icon: '🔗' },
   { id: 'analyzing',  label: 'Analyse', icon: '📊' },
   { id: 'filling',    label: 'LLM Fill', icon: '🤖' },
+  { id: 'ranking',    label: 'Rank',    icon: '🏆' },
 ];
 
 function buildPipelineSteps() {
@@ -212,7 +213,7 @@ function handleSSE(msg) {
 
 function renderResults(data) {
   const { query, entity_type, columns, entities, sources_consulted,
-          search_queries_used, rounds_completed } = data;
+          search_queries_used, rounds_completed, ranking } = data;
 
   document.getElementById('resultsTitle').textContent =
     `${entities.length} ${entity_type}`;
@@ -225,12 +226,34 @@ function renderResults(data) {
     `Every highlighted value traces to a source. Click the blue badges (①②③) to see the exact excerpt.` +
     (hasLLMFilled ? '  * Starred values are LLM estimates and may be inaccurate.' : '');
 
-  // Build column list: skip 'name' from columns since it's rendered first anyway
+  // ── Constraint pills strip ──────────────────────────────────────────────
+  const existingPills = document.getElementById('rankingPills');
+  if (existingPills) existingPills.remove();
+
+  const hasRanking = ranking && ranking.total > 0 && ranking.labels && ranking.labels.length > 0;
+  if (hasRanking) {
+    const pillsBar = document.createElement('div');
+    pillsBar.id = 'rankingPills';
+    pillsBar.className = 'ranking-pills-bar';
+    pillsBar.innerHTML =
+      `<span class="ranking-pills-label">Ranked by</span>` +
+      ranking.labels.map(lbl =>
+        `<span class="ranking-pill">${escapeHtml(lbl)}</span>`
+      ).join('');
+    // Insert before the table scroll container
+    document.querySelector('.table-scroll').before(pillsBar);
+  }
+
+  // Build column list
   const allCols = columns;
+  const showRank = hasRanking;
 
   // Header
   const thead = document.getElementById('tableHead');
-  thead.innerHTML = `<tr>${allCols.map(c => `<th>${c.replace(/_/g, ' ')}</th>`).join('')}<th>Sources</th></tr>`;
+  thead.innerHTML = `<tr>` +
+    (showRank ? `<th class="rank-th">Match</th>` : '') +
+    allCols.map(c => `<th>${c.replace(/_/g, ' ')}</th>`).join('') +
+    `<th>Sources</th></tr>`;
 
   // Body
   const tbody = document.getElementById('tableBody');
@@ -239,6 +262,18 @@ function renderResults(data) {
   entities.forEach((entity, entityIdx) => {
     const tr = document.createElement('tr');
     let allSources = [];
+
+    // ── Rank badge cell ─────────────────────────────────────────────────
+    if (showRank) {
+      const rankTd = document.createElement('td');
+      rankTd.className = 'rank-cell';
+      const n   = ranking.scores[entity.id] ?? 0;
+      const tot = ranking.total;
+      const pct = tot > 0 ? n / tot : 0;
+      const cls = pct === 1 ? 'rank-full' : pct >= 0.5 ? 'rank-partial' : 'rank-none';
+      rankTd.innerHTML = `<span class="rank-badge ${cls}" title="${n} of ${tot} constraints matched">${n}/${tot}</span>`;
+      tr.appendChild(rankTd);
+    }
 
     allCols.forEach((col, colIdx) => {
       const td = document.createElement('td');

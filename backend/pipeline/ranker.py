@@ -23,7 +23,7 @@ from typing import Any
 
 from cerebras.cloud.sdk import AsyncCerebras
 
-from ..models import Entity
+from ..models import Entity, RankingInfo
 from .utils import extract_json_obj
 
 logger = logging.getLogger(__name__)
@@ -400,31 +400,75 @@ def _score_entity(entity: Entity, constraints: dict, columns: list[str]) -> int:
     return n
 
 
+# ── Constraint label builder ──────────────────────────────────────────────────
+
+def _fmt_threshold(val: float) -> str:
+    """Format a raw threshold number as a human-readable string ($10M, 4.5, 2020…)."""
+    if val >= 1_000_000_000:
+        return f"${val / 1_000_000_000:.4g}B"
+    if val >= 1_000_000:
+        return f"${val / 1_000_000:.4g}M"
+    if val >= 1_000:
+        return f"${val / 1_000:.4g}K"
+    # Plain number — no $ for small values (ratings, years, counts)
+    if val == int(val):
+        return str(int(val))
+    return f"{val:.4g}"
+
+
+def _build_labels(constraints: dict) -> list[str]:
+    """Return one human-readable string per constraint."""
+    labels: list[str] = []
+
+    location = constraints.get("location")
+    if location:
+        labels.append(f"Based in {location}")
+
+    for nc in constraints.get("numeric", []):
+        field = nc.get("field_hint", "value").replace("_", " ").title()
+        op    = nc.get("op", ">")
+        thr   = _fmt_threshold(float(nc.get("threshold", 0)))
+        labels.append(f"{field} {op} {thr}")
+
+    for cc in constraints.get("categorical", []):
+        field    = cc.get("field_hint", "type").replace("_", " ").title()
+        keywords = cc.get("keywords", [])
+        primary  = keywords[0] if keywords else "?"
+        labels.append(f"{field}: {primary}")
+
+    return labels
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def rank_entities(
     entities: list[Entity],
     constraints: dict,
     columns: list[str],
-) -> list[Entity]:
+) -> tuple[list[Entity], RankingInfo]:
     """
     Re-rank entities by constraint satisfaction (descending), then by
     data coverage (descending) within the same tier.
 
-    Entities satisfying ALL constraints are guaranteed to appear first.
+    Returns the re-ordered entity list AND a RankingInfo object that carries
+    per-entity scores and human-readable constraint labels for the UI.
     """
-    has_location = bool(constraints.get("location"))
-    has_numeric = bool(constraints.get("numeric"))
+    labels = _build_labels(constraints)
+    total  = len(labels)
+
+    has_location   = bool(constraints.get("location"))
+    has_numeric    = bool(constraints.get("numeric"))
     has_categorical = bool(constraints.get("categorical"))
 
     if not (has_location or has_numeric or has_categorical):
-        # Nothing to rank on — preserve current order
-        return entities
+        # No constraints — preserve order, return empty ranking info
+        scores = {e.id: 0 for e in entities}
+        return entities, RankingInfo(total=0, labels=[], scores=scores)
 
     scored: list[tuple[Entity, int, float]] = []
     for entity in entities:
         n_sat = _score_entity(entity, constraints, columns)
-        cov = entity.coverage(columns)
+        cov   = entity.coverage(columns)
         scored.append((entity, n_sat, cov))
 
     scored.sort(key=lambda x: (x[1], x[2]), reverse=True)
@@ -432,11 +476,13 @@ def rank_entities(
     if logger.isEnabledFor(logging.INFO):
         for entity, n_sat, cov in scored:
             logger.info(
-                "  [rank] %-40s  satisfied=%d  coverage=%.2f",
-                entity.get_name(), n_sat, cov,
+                "  [rank] %-40s  satisfied=%d/%d  coverage=%.2f",
+                entity.get_name(), n_sat, total, cov,
             )
 
-    return [x[0] for x in scored]
+    ranked  = [x[0] for x in scored]
+    scores  = {x[0].id: x[1] for x in scored}
+    return ranked, RankingInfo(total=total, labels=labels, scores=scores)
 
 
 async def extract_and_rank(
@@ -444,16 +490,19 @@ async def extract_and_rank(
     entities: list[Entity],
     columns: list[str],
     query: str,
-) -> list[Entity]:
+) -> tuple[list[Entity], RankingInfo]:
     """
     Main entry point called by the pipeline.
 
     1. LLM parses the query into location / numeric / categorical constraints.
     2. Each entity is scored (how many constraints it satisfies).
     3. Entities are re-ordered: more constraints met → higher position, mandatory.
+
+    Returns (ranked_entities, RankingInfo) so the caller can attach metadata
+    to the final EntityTable for the frontend to display.
     """
     if not entities:
-        return entities
+        return entities, RankingInfo(total=0, labels=[], scores={})
 
     constraints = await _extract_constraints_llm(client, query)
     logger.info("Ranking constraints extracted: %s", constraints)
