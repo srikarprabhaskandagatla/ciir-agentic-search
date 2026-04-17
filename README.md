@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  CIIR Agentic Search
+  Agentic Search
   <br>
 </h1>
 
